@@ -1,0 +1,7 @@
+OpenJDK Server VM (25.212-b03) for linux-x86 JRE (1.8.0_212-8u212-b03-0ubuntu1.16.04.1-b03), built on Apr 26 2019 02:11:00 by "buildd" with gcc 5.4.0 20160609
+Memory: 4k page, physical 4135860k(312548k free), swap 998396k(958196k free)
+CommandLine flags: -XX:+ExplicitGCInvokesConcurrent -XX:GCLogFileSize=104857600 -XX:InitialHeapSize=536870912 -XX:InitiatingHeapOccupancyPercent=35 -XX:+ManagementServer -XX:MaxGCPauseMillis=20 -XX:MaxHeapSize=536870912 -XX:NumberOfGCLogFiles=10 -XX:+PrintGC -XX:+PrintGCDateStamps -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+UseG1GC -XX:+UseGCLogFileRotation 
+Heap
+ garbage-first heap   total 524288K, used 22528K [0x87000000, 0x87100800, 0xa7000000)
+  region size 1024K, 23 young (23552K), 0 survivors (0K)
+ Metaspace       used 6790K, capacity 6929K, committed 6936K, reserved 7472K
