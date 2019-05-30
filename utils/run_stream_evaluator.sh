@@ -1,3 +1,3 @@
 #!/bin/bash
 
-mvn compile exec:java -Dexec.mainClass=exercises.StreamEvaluator -Pdirect-runner
+mvn compile exec:sudo java -Dexec.mainClass=exercises.StreamEvaluator -Pdirect-runner

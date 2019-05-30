@@ -55,11 +55,10 @@ sleep 5
 keep_sending=1
 i=0
 while [[ "$keep_sending" = "1" ]]; do
-  echo "key$(( (RANDOM % 1000 ) )):$(( (RANDOM % 10000 ) ))=$(( (RANDOM % 10 )  + 1 ))"
+  echo "($(( (RANDOM % 1000 ) )),$(( (RANDOM % 10000 ) )),$(( (RANDOM % 10 ) + 1 )))"
   i=$((i+1))
   sleep 1
-done
- #| ./bin/kafka-console-producer.sh --broker-list localhost:9092 --topic demo-kv --property "parse.key=true" --property "key.separator=:" >/dev/null &
+done | ./bin/kafka-console-producer.sh --broker-list localhost:9092 --topic demo-kv >/dev/null &
 demo_kv_pid=$!
 
 stop_demo_data() {
