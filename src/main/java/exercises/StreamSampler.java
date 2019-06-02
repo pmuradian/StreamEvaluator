@@ -5,33 +5,22 @@ import org.apache.beam.sdk.PipelineResult;
 import org.apache.beam.sdk.io.kafka.KafkaIO;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
-
 import org.apache.beam.sdk.transforms.DoFn;
-import org.apache.beam.sdk.transforms.MapElements;
 import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
-
-import org.apache.beam.sdk.values.TypeDescriptors;
-import org.apache.kafka.common.protocol.types.Field;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.apache.kafka.common.serialization.StringSerializer;
-import org.apache.kafka.common.serialization.LongSerializer;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hdfs.DistributedFileSystem;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Random;
 import java.util.UUID;
 
@@ -42,20 +31,18 @@ class Hasher extends DoFn< KV<String, String>, KV<String, String> > {
         System.out.println("hashing");
         System.out.println(kv.getKey());
         System.out.println(kv.getValue());
-        if (key < StreamEvaluator.samplePercentage) {
-            StreamEvaluator.appendToOutputString(kv);
-            if (StreamEvaluator.getSampleCounter() >= StreamEvaluator.samplesPerFile) {
-                HDFSWriter.writeTo(StreamEvaluator.getOutputString());
-                StreamEvaluator.reset();
+        if (key < StreamSampler.samplePercentage) {
+            StreamSampler.appendToOutputString(kv);
+            if (StreamSampler.getSampleCounter() >= StreamSampler.samplesPerFile) {
+                HDFSWriter.writeTo(StreamSampler.getOutputString());
+                StreamSampler.reset();
             }
-
-//            System.out.println("Written\n" + kv.getKey() + " ======= " + kv.getValue());
         }
         out.output(kv);
     }
 
     private Integer hash() {
-        return (new Random()).nextInt(StreamEvaluator.N);
+        return (new Random()).nextInt(StreamSampler.N);
     }
 }
 
@@ -74,7 +61,7 @@ class HDFSWriter {
         conf.set(hdfsName, hdfsPath);
         System.out.println("Getting FileSystem");
         try {
-            Path path = new Path( samplePath + StreamEvaluator.evaluatorID + "_" + fileCounter.toString() + sampleFileName);
+            Path path = new Path( samplePath + StreamSampler.evaluatorID + "_" + fileCounter.toString() + sampleFileName);
 
             FileSystem fs = FileSystem.get(conf);
             if (!fs.exists(path)) {
@@ -104,10 +91,7 @@ class HDFSWriter {
     }
 }
 
-public class StreamEvaluator {
-    // Read streamed data from Kafka and save it to HDFS
-
-//    public static HashMap<Integer, ArrayList<KV<String, String>>> buckets = new HashMap<>();
+public class StreamSampler {
     private static Integer sampleCounter = 0;
     private static String outputString = "";
     public static final Integer N = 100;
@@ -116,16 +100,8 @@ public class StreamEvaluator {
     public static String evaluatorID = UUID.randomUUID().toString();
 
     public static void main(String[] args) throws IOException {
-        // Implement a sampling algorithm which keeps a random sample of size N of elements seen up to this points.
-        // Note that each element should have the same probability of being in the sample. After seeing M elements it should be min(N/M, 1)
         PipelineOptions pipelineOptions = PipelineOptionsFactory.create();
         Pipeline pipeline = Pipeline.create(pipelineOptions);
-//
-//        for (int i = 0; i < samplePercentage; i++) {
-//            buckets.put(i, new ArrayList<>());
-//        }
-
-        Hasher hasher = new Hasher();
 
         pipeline.apply(kafkaReader())
                 .apply(ParDo.of(new Hasher()));

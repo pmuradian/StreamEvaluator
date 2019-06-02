@@ -50,7 +50,6 @@ trap stop_kafka EXIT
 
 sleep 5
 ./bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic demo-kv
-./bin/kafka-topics.sh --create --zookeeper localhost:2181 --replication-factor 1 --partitions 1 --topic demo-kv-output
 
 keep_sending=1
 i=0
